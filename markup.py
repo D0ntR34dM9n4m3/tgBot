@@ -5,12 +5,13 @@ from aiogram import  types
 
 
 #                                              """Main menu"""
-main_btn1 = types.KeyboardButton(text=f'Год')
-main_btn2 = types.KeyboardButton(text='Месяц')
+main_btn1 = types.KeyboardButton(text=f'Год и месяц')
+#main_btn2 = types.KeyboardButton(text='Месяц')
 main_btn3 = types.KeyboardButton(text='Рейтинг')
 main_btn4 = types.KeyboardButton(text='Жанр')
 main_btn5 = types.KeyboardButton(text='Начать поиск')
-kb_main = ReplyKeyboardMarkup(resize_keyboard = True, row_width=2).add(main_btn1,main_btn2,main_btn3,main_btn4,main_btn5)
+kb_main = ReplyKeyboardMarkup(resize_keyboard = True, row_width=2).add(main_btn1).add(main_btn3,main_btn4,main_btn5)
+
 
 #                                              """Month Choice"""
 btns_months = [None]*12
@@ -29,16 +30,19 @@ btns_months[11] = types.InlineKeyboardButton(text='Декабрь', callback_dat
 kb_month = InlineKeyboardMarkup(one_time_keyboard=True, row_width=3).add(*btns_months)
 
 #                                              """Year Choice"""
-btns_years = [None]*9
-btns_years[0] = types.InlineKeyboardButton(text='2014', callback_data='y_2014')
-btns_years[1] = types.InlineKeyboardButton(text='2015', callback_data='y_2015')
-btns_years[2] = types.InlineKeyboardButton(text='2016', callback_data='y_2016')
-btns_years[3] = types.InlineKeyboardButton(text='2017', callback_data='y_2017')
-btns_years[4] = types.InlineKeyboardButton(text='2018', callback_data='y_2018')
-btns_years[5] = types.InlineKeyboardButton(text='2019', callback_data='y_2019')
-btns_years[6] = types.InlineKeyboardButton(text='2020', callback_data='y_2020')
-btns_years[7] = types.InlineKeyboardButton(text='2021', callback_data='y_2021')
-btns_years[8] = types.InlineKeyboardButton(text='2022', callback_data='y_2022')
+btns_years = [None]*12
+btns_years[0] = types.InlineKeyboardButton(text='2011', callback_data='y_2014')
+btns_years[1] = types.InlineKeyboardButton(text='2012', callback_data='y_2015')
+btns_years[2] = types.InlineKeyboardButton(text='2013', callback_data='y_2016')
+btns_years[3] = types.InlineKeyboardButton(text='2014', callback_data='y_2014')
+btns_years[4] = types.InlineKeyboardButton(text='2015', callback_data='y_2015')
+btns_years[5] = types.InlineKeyboardButton(text='2016', callback_data='y_2016')
+btns_years[6] = types.InlineKeyboardButton(text='2017', callback_data='y_2017')
+btns_years[7] = types.InlineKeyboardButton(text='2018', callback_data='y_2018')
+btns_years[8] = types.InlineKeyboardButton(text='2019', callback_data='y_2019')
+btns_years[9] = types.InlineKeyboardButton(text='2020', callback_data='y_2020')
+btns_years[10] = types.InlineKeyboardButton(text='2021', callback_data='y_2021')
+btns_years[11] = types.InlineKeyboardButton(text='2022', callback_data='y_2022')
 kb_year = InlineKeyboardMarkup(row_width=3).add(*btns_years)
 
 
@@ -71,7 +75,6 @@ kb_rating = InlineKeyboardMarkup(row_width=3).add(*btns_rating)
 
 btn_start = types.KeyboardButton(text='/reload')
 kb_start = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(btn_start)
-
 
 
 

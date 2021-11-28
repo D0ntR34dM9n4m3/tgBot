@@ -10,7 +10,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import telegram_api
 import markup
 from bot import run, get_movie_url_year_name, get_trailer, get_kp_trailer   # get_trailer и get_kp_trailer взаимозаменяемы
-
+from markup import kb_month
 
 bot = Bot(token=telegram_api)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -67,7 +67,7 @@ async def command_reload(message: types.Message, state: FSMContext):
 async def command_month(message: types.Message, state: FSMContext):
     await message.reply('Выбери из списка ниже:', reply_markup=markup.kb_month)
 
-@dp.message_handler(Text(equals='год', ignore_case=True), state=FSMuser.state_main)
+@dp.message_handler(Text(equals='Год и месяц', ignore_case=True), state=FSMuser.state_main)
 async def command_year(message: types.Message, state: FSMContext):
     await message.reply('Выбери из списка ниже:', reply_markup=markup.kb_year)
 
@@ -141,10 +141,12 @@ async def cmd_callback(call: types.CallbackQuery, state: FSMContext):
     if msg.startswith('m_'):
         async with state.proxy() as data:
             data['month'] = month
+        await call.message.edit_reply_markup()
         await call.message.answer(f'Месяц: <b>{value}</b>', parse_mode='html')
     if msg.startswith('y_'):
         async with state.proxy() as data:
             data['year'] = value
+        await call.message.edit_reply_markup(reply_markup=kb_month)
         await call.message.answer(f'Год <b>{value}</b>-й', parse_mode='html')
     if msg.startswith('g_'):
         if any_genre == '':
@@ -153,16 +155,18 @@ async def cmd_callback(call: types.CallbackQuery, state: FSMContext):
         else:
             async with state.proxy() as data:
                 data['genre'] = value
+        await call.message.edit_reply_markup()
         await call.message.answer(f'Будем искать фильмы в жанре "<b>{value}</b>"!', parse_mode='html')
     if msg.startswith('r_'):
         async with state.proxy() as data:
             data['rating'] = value
+        await call.message.edit_reply_markup()
         await call.message.answer(f'С рейтингом <b>{value}</b> и выше', parse_mode='html')
     if msg.startswith('f_'):
         async with state.proxy() as data:
             link, year, name = get_movie_url_year_name(value)
             btn_trailer = types.InlineKeyboardButton(text=f'Найти трейлер', callback_data=f't_{value}')
-            kb_trailer = InlineKeyboardMarkup(row_width=1, resize_keyboard=True).add(btn_trailer)
+            kb_trailer = InlineKeyboardMarkup(row_width=2, resize_keyboard=True).add(btn_trailer)
             try:
                 await call.message.answer(f"{movie_info(value, data)}", parse_mode=types.ParseMode.HTML, reply_markup=kb_trailer)
             except UnboundLocalError:
