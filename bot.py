@@ -45,7 +45,7 @@ async def run(data):
     for page in range (2, page_amount(movie_list) + 1):
         for movie in movie_list.json()['releases']:
                 if movie['rating'] and movie['rating'] >= float(data['rating']):
-                    if movie['genres'] and data['genre']:
+                    if movie['genres'] and data['genre'] :
                         for i in movie['genres']:
                             if data['genre'] in i['genre']:
                                 data['movies'] = parse(movie, data)
