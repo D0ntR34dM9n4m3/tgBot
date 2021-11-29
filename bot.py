@@ -25,9 +25,6 @@ def page_amount(response):
         if total % 10 == 0:
                 pages = total // 10
         else: pages = (total // 10) + 1
-
-        print (total)
-        print(pages)
         return pages
 
 def parse(movie, data):

@@ -98,7 +98,7 @@ async def command_parse(message: types.Message, state: FSMContext):
             await FSMuser.state_searching.set()
             data = await run(data)
 
-                                                        # Клавиатура со списком фильмов
+                                                   # Клавиатура со списком фильмов
             btns_movie = [None] * len(data['movies'])
             count = 0                                   # каунтер для кнопок
             for i in data['movies']:
@@ -110,9 +110,11 @@ async def command_parse(message: types.Message, state: FSMContext):
             else:
                 await message.answer('Поиск успешно окончен! Вот результаты, которые можно изучить подробнее:', reply_markup=kb_movie)
 
-
+            data['tmp_movies'] = []
+            data['tmp_movies'], data['movies'] = data['movies'], data['tmp_movies']
+            data['movies'].clear()
             await FSMuser.state_main.set()
-            await message.answer('Обращайся еще :)', reply_markup=markup.kb_start)
+            await message.answer('Обращайся еще :)', reply_markup=markup.kb_main)
         elif data['year'] == None and data['month']:
             await message.answer('Нужно выбрать год!')
         elif data['month'] == None and data['year']:
@@ -122,14 +124,11 @@ async def command_parse(message: types.Message, state: FSMContext):
 
 
 def movie_info(id, data):
-    for movie in data['movies']:
+    for movie in data:
         if movie.id == id:
-            genres = str(movie.genres)
-            genres = genres.replace('[', '').replace(']', '').replace('\'', '')
-            countries = str(movie.countries)
-            countries = countries.replace('[', '').replace(']', '').replace('\'', '')
+            genres = fmt.text(*movie.genres, sep=', ')
+            countries = fmt.text(*movie.countries, sep=', ')
             rating = round(movie.rating, 1)
-
     link, year, name = get_movie_url_year_name(id)
     link = fmt.hide_link(link)
     msg_text = f"{link}{countries}  {rating}\n({genres})"
@@ -177,11 +176,9 @@ async def cmd_callback(call: types.CallbackQuery, state: FSMContext):
             btn_trailer = types.InlineKeyboardButton(text=f'Найти трейлер', callback_data=f't_{value}')
             kb_trailer = InlineKeyboardMarkup(row_width=2, resize_keyboard=True).add(btn_trailer)
             try:
-                await call.message.answer(f"{movie_info(value, data)}", parse_mode=types.ParseMode.HTML, reply_markup=kb_trailer)
+                await call.message.answer(f"{movie_info(value, data['tmp_movies'])}", parse_mode=types.ParseMode.HTML, reply_markup=kb_trailer)
             except UnboundLocalError:
                 await call.message.answer("Эти кнопки уже устарели...", parse_mode=types.ParseMode.HTML)
-            except Exception:
-                await call.message.answer(f"{movie_info(value, data)}", parse_mode=types.ParseMode.HTML)
 
 
     if msg.startswith('t_'):
