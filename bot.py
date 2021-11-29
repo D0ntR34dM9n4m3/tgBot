@@ -25,6 +25,9 @@ def page_amount(response):
         if total % 10 == 0:
                 pages = total // 10
         else: pages = (total // 10) + 1
+
+        print (total)
+        print(pages)
         return pages
 
 def parse(movie, data):
@@ -48,12 +51,13 @@ async def run(data):
                     if movie['genres'] and data['genre'] :
                         for i in movie['genres']:
                             if data['genre'] in i['genre']:
-                                data['movies'] = parse(movie, data)
-                                break
+                                for i in range(len(movie_list.json())):
+                                    data['movies'] = parse(movie, data)
+                                    break
                     else:
-
-                        data['movies'] = parse(movie, data)
-                        break
+                        for i in range(len(movie_list.json())):
+                            data['movies'] = parse(movie, data)
+                            break
         params['page'] = page
         movie_list = requests.get(releases_url, headers=headers, params=params)
     params['page'] = 1

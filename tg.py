@@ -43,10 +43,13 @@ async def command_start(message: types.Message, state: FSMContext):
     await FSMuser.state_main.set()
     async with state.proxy() as data:
         data['movies'] = []
+        data['chosen_month'] = 'не выбран'
         data['month'] = None
+        data['chosen_year'] = 'не выбран'
         data['year'] = None
-        data['rating'] = 0.1
+        data['rating'] = 0
         data['genre'] = ''
+        data['chosen_genre'] = 'любой'
     await bot.send_message(message.from_user.id, 'Привет, {0.first_name}!\nПо каким параметрам будем искать фильмы?'.format(message.from_user), reply_markup=markup.kb_main)
 
 
@@ -57,27 +60,33 @@ async def command_reload(message: types.Message, state: FSMContext):
     await FSMuser.state_main.set()
     async with state.proxy() as data:
         data['movies'] = []
+        data['chosen_month'] = 'не выбран'
         data['month'] = None
         data['year'] = None
-        data['rating'] = 0.1
+        data['chosen_year'] = 'не выбран'
+        data['rating'] = 0
         data['genre'] = ''
+        data['chosen_genre'] = 'любой'
     await message.reply('Все введенные данные обновлены', reply_markup=markup.kb_main)
 
 @dp.message_handler(Text(equals='месяц', ignore_case=True), state=FSMuser.state_main)
 async def command_month(message: types.Message, state: FSMContext):
-    await message.reply(f'Выбери из списка ниже. \nТекущее значение - {value}', reply_markup=markup.kb_month)
+    await message.reply('Выбери из списка ниже', reply_markup=markup.kb_month)
 
 @dp.message_handler(Text(equals='Год и месяц', ignore_case=True), state=FSMuser.state_main)
 async def command_year(message: types.Message, state: FSMContext):
-    await message.reply(f'Выбери из списка ниже. \nТекущее значение - {value}', reply_markup=markup.kb_year)
+    async with state.proxy() as data:
+        await message.reply(f'Текущее значение: месяц <b>{data["chosen_month"]}</b>, год <b>{data["chosen_year"]}</b>', reply_markup=markup.kb_year, parse_mode='html')
 
 @dp.message_handler(Text(equals='жанр', ignore_case=True), state=FSMuser.state_main)
 async def command_genre(message: types.Message, state: FSMContext):
-    await message.reply(f'Выбери жанр для фильма из списка ниже. \nТекущее значение - {value}', reply_markup=markup.kb_genre)
+    async with state.proxy() as data:
+        await message.reply(f'Текущее значение - <b>{data["chosen_genre"]}</b>, его можно изменить', reply_markup=markup.kb_genre, parse_mode='html')
 
 @dp.message_handler(Text(equals='рейтинг', ignore_case=True), state=FSMuser.state_main)
 async def command_rating(message: types.Message, state: FSMContext):
-    await message.reply(f'Минимальный рейтинг для отображения. \nТекущее значение - {value}', reply_markup=markup.kb_rating)
+    async with state.proxy() as data:
+        await message.reply(f'Текущее значение - <b>{data["rating"]}</b>, его можно изменить', reply_markup=markup.kb_rating, parse_mode='html')
 
 
 @dp.message_handler(Text(equals='начать поиск', ignore_case=True), state=FSMuser.state_main)
@@ -85,7 +94,7 @@ async def command_parse(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         if data['month'] and data['year']:
             kb_main = types.ReplyKeyboardRemove()
-            await message.reply('Подождите немного...', reply_markup=kb_main)
+            await message.reply('Подожди немного...', reply_markup=kb_main)
             await FSMuser.state_searching.set()
             data = await run(data)
 
@@ -100,15 +109,10 @@ async def command_parse(message: types.Message, state: FSMContext):
                 await message.answer('К сожалению, поиск не дал результатов :(')
             else:
                 await message.answer('Поиск успешно окончен! Вот результаты, которые можно изучить подробнее:', reply_markup=kb_movie)
-           # await state.finish()
+
+
             await FSMuser.state_main.set()
-            async with state.proxy() as data:
-                data['movies'] = []
-              #  data['month'] = None
-              #  data['year'] = None
-              #  data['rating'] = 0.1
-              #  data['genre'] = ''
-            await message.answer('Обращайся еще :)', reply_markup=markup.kb_main)
+            await message.answer('Обращайся еще :)', reply_markup=markup.kb_start)
         elif data['year'] == None and data['month']:
             await message.answer('Нужно выбрать год!')
         elif data['month'] == None and data['year']:
@@ -142,20 +146,24 @@ async def cmd_callback(call: types.CallbackQuery, state: FSMContext):
     if msg.startswith('m_'):
         async with state.proxy() as data:
             data['month'] = month
+            data['chosen_month'] = value
         await call.message.edit_reply_markup()
         await call.message.answer(f'Месяц: <b>{value}</b>', parse_mode='html')
     if msg.startswith('y_'):
         async with state.proxy() as data:
             data['year'] = value
+            data['chosen_year'] = value
         await call.message.edit_reply_markup(reply_markup=kb_month)
         await call.message.answer(f'Год <b>{value}</b>-й', parse_mode='html')
     if msg.startswith('g_'):
         if any_genre == '':
             async with state.proxy() as data:
-                data['genre'] = any_genre
+                data['genre'] = ''
+                data['chosen_genre'] = 'любой'
         else:
             async with state.proxy() as data:
                 data['genre'] = value
+                data['chosen_genre'] = value
         await call.message.edit_reply_markup()
         await call.message.answer(f'Будем искать фильмы в жанре "<b>{value}</b>"!', parse_mode='html')
     if msg.startswith('r_'):
