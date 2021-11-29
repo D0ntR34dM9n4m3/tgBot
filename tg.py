@@ -101,6 +101,7 @@ async def command_parse(message: types.Message, state: FSMContext):
             else:
                 await message.answer('Поиск успешно окончен! Вот результаты, которые можно изучить подробнее:', reply_markup=kb_movie)
            # await state.finish()
+            await FSMuser.state_main.set()
             async with state.proxy() as data:
                 data['movies'] = []
               #  data['month'] = None
