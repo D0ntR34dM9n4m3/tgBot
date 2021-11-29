@@ -100,14 +100,14 @@ async def command_parse(message: types.Message, state: FSMContext):
                 await message.answer('К сожалению, поиск не дал результатов :(')
             else:
                 await message.answer('Поиск успешно окончен! Вот результаты, которые можно изучить подробнее:', reply_markup=kb_movie)
-            await state.finish()
+           # await state.finish()
             async with state.proxy() as data:
                 data['movies'] = []
-                data['month'] = None
-                data['year'] = None
-                data['rating'] = 0.1
-                data['genre'] = ''
-            await message.answer('Обращайся еще :)', reply_markup=markup.kb_start)
+              #  data['month'] = None
+              #  data['year'] = None
+              #  data['rating'] = 0.1
+              #  data['genre'] = ''
+            await message.answer('Обращайся еще :)', reply_markup=markup.kb_main)
         elif data['year'] == None and data['month']:
             await message.answer('Нужно выбрать год!')
         elif data['month'] == None and data['year']:
