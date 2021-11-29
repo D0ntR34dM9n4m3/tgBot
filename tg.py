@@ -65,19 +65,19 @@ async def command_reload(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Text(equals='месяц', ignore_case=True), state=FSMuser.state_main)
 async def command_month(message: types.Message, state: FSMContext):
-    await message.reply('Выбери из списка ниже:', reply_markup=markup.kb_month)
+    await message.reply(f'Выбери из списка ниже. \nТекущее значение - {value}', reply_markup=markup.kb_month)
 
 @dp.message_handler(Text(equals='Год и месяц', ignore_case=True), state=FSMuser.state_main)
 async def command_year(message: types.Message, state: FSMContext):
-    await message.reply('Выбери из списка ниже:', reply_markup=markup.kb_year)
+    await message.reply(f'Выбери из списка ниже. \nТекущее значение - {value}', reply_markup=markup.kb_year)
 
 @dp.message_handler(Text(equals='жанр', ignore_case=True), state=FSMuser.state_main)
 async def command_genre(message: types.Message, state: FSMContext):
-    await message.reply('Выбери жанр для фильма из списка ниже:', reply_markup=markup.kb_genre)
+    await message.reply(f'Выбери жанр для фильма из списка ниже. \nТекущее значение - {value}', reply_markup=markup.kb_genre)
 
 @dp.message_handler(Text(equals='рейтинг', ignore_case=True), state=FSMuser.state_main)
 async def command_rating(message: types.Message, state: FSMContext):
-    await message.reply('Минимальный рейтинг для отображения:', reply_markup=markup.kb_rating)
+    await message.reply(f'Минимальный рейтинг для отображения. \nТекущее значение - {value}', reply_markup=markup.kb_rating)
 
 
 @dp.message_handler(Text(equals='начать поиск', ignore_case=True), state=FSMuser.state_main)
