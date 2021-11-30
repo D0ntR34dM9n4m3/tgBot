@@ -9,7 +9,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import telegram_api
 import markup
-from bot import run, get_movie_url_year_name, get_trailer, get_kp_trailer   # get_trailer и get_kp_trailer взаимозаменяемы
+from bot import run, get_movie_url_year_name, get_trailer
 from markup import kb_month
 
 bot = Bot(token=telegram_api)
@@ -42,6 +42,7 @@ async def command_help(message: types.Message, state: FSMContext):
 async def command_start(message: types.Message, state: FSMContext):
     await FSMuser.state_main.set()
     async with state.proxy() as data:
+        data['tmp_movies'] = []
         data['movies'] = []
         data['chosen_month'] = 'не выбран'
         data['month'] = None
@@ -59,6 +60,7 @@ async def command_reload(message: types.Message, state: FSMContext):
     await state.finish()
     await FSMuser.state_main.set()
     async with state.proxy() as data:
+        data['tmp_movies'] = []
         data['movies'] = []
         data['chosen_month'] = 'не выбран'
         data['month'] = None
@@ -97,7 +99,7 @@ async def command_parse(message: types.Message, state: FSMContext):
             await message.reply('Подожди немного...', reply_markup=kb_main)
             await FSMuser.state_searching.set()
             data = await run(data)
-
+            print(f'{message.from_user.id} ({message.from_user.username}) {message.from_user.first_name} запустил поиск')
                                                    # Клавиатура со списком фильмов
             btns_movie = [None] * len(data['movies'])
             count = 0                                   # каунтер для кнопок
@@ -106,15 +108,17 @@ async def command_parse(message: types.Message, state: FSMContext):
                 count += 1
             kb_movie = InlineKeyboardMarkup(row_width=1).add(*btns_movie)
             if count == 0:
-                await message.answer('К сожалению, поиск не дал результатов :(')
+                await FSMuser.state_main.set()
+                await message.answer('К сожалению, поиск не дал результатов :(', reply_markup=markup.kb_main)
             else:
                 await message.answer('Поиск успешно окончен! Вот результаты, которые можно изучить подробнее:', reply_markup=kb_movie)
 
-            data['tmp_movies'] = []
-            data['tmp_movies'], data['movies'] = data['movies'], data['tmp_movies']
-            data['movies'].clear()
-            await FSMuser.state_main.set()
-            await message.answer('Обращайся еще :)', reply_markup=markup.kb_main)
+                data['tmp_movies'] = []
+                data['tmp_movies'], data['movies'] = data['movies'], data['tmp_movies']
+                data['movies'].clear()
+                await FSMuser.state_main.set()
+                await message.answer('Обращайся еще :)', reply_markup=markup.kb_main)
+
         elif data['year'] == None and data['month']:
             await message.answer('Нужно выбрать год!')
         elif data['month'] == None and data['year']:
@@ -179,7 +183,7 @@ async def cmd_callback(call: types.CallbackQuery, state: FSMContext):
                 await call.message.answer(f"{movie_info(value, data['tmp_movies'])}", parse_mode=types.ParseMode.HTML, reply_markup=kb_trailer)
             except UnboundLocalError:
                 await call.message.answer("Эти кнопки уже устарели...", parse_mode=types.ParseMode.HTML)
-
+    print(f'{call.from_user.id} ({call.from_user.username}) {call.from_user.first_name} выбрал {msg.split("_")[0]}_{value}')
 
     if msg.startswith('t_'):
 

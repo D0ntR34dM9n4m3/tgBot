@@ -69,7 +69,7 @@ def get_movie_url_year_name(id):
     name = movie_info.json()['nameRu']
     return url, year, name
 
-async def get_trailer(id):                                                                        # выбрать одну функцию из двух
+async def get_trailer(id):
     youtube_req = 'https://www.googleapis.com/youtube/v3/search'
     notNeeded, year, name = get_movie_url_year_name(id)
     youtube_params['q'] = f'{name} {year} трейлер'
@@ -83,7 +83,7 @@ async def get_trailer(id):                                                      
     video_url = 'https://www.youtube.com/watch?v=' + trailer_id
     return video_url
 
-def get_kp_trailer(mov_id):                                                                     # выбрать одну функцию из двух
+def get_kp_trailer(mov_id):                                                                         # второй вариант
     kp_trailer_req = 'https://kinopoiskapiunofficial.tech/api/v2.2/films/' + mov_id + '/videos'
     trailer_response = requests.get(kp_trailer_req, headers=headers)
     url = trailer_response.json()['items'][0]['url']
